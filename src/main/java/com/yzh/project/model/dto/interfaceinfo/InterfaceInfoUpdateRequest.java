@@ -53,6 +53,11 @@ public class InterfaceInfoUpdateRequest implements Serializable {
     private String method;
 
     /**
+     * 请求參數
+     */
+    private String requestParams;
+
+    /**
      * 创建人
      */
     private Long userId;

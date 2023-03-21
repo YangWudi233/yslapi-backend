@@ -2,20 +2,21 @@ package com.yzh.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.gson.Gson;
 import com.yzh.project.annotation.AuthCheck;
-import com.yzh.project.common.BaseResponse;
-import com.yzh.project.common.DeleteRequest;
-import com.yzh.project.common.ErrorCode;
-import com.yzh.project.common.ResultUtils;
+import com.yzh.project.common.*;
 import com.yzh.project.constant.CommonConstant;
 import com.yzh.project.exception.BusinessException;
 import com.yzh.project.model.dto.interfaceinfo.InterfaceInfoAddRequest;
+import com.yzh.project.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import com.yzh.project.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.yzh.project.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
 import com.yzh.project.model.entity.InterfaceInfo;
 import com.yzh.project.model.entity.User;
+import com.yzh.project.model.enums.InterfaceInfoStatusEnum;
 import com.yzh.project.service.InterfaceInfoService;
 import com.yzh.project.service.UserService;
+import com.yzh.yslapiclientsdk.client.YslApiClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -25,8 +26,9 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+
 /**
- * 帖子接口
+ * 接口管理
  *
  * @author yzh
  */
@@ -40,6 +42,9 @@ public class InterfaceInfoController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private YslApiClient yslApiClient;
 
     // region 增删改查
 
@@ -195,5 +200,103 @@ public class InterfaceInfoController {
     }
 
     // endregion
+    /**
+     * 发布接口
+     *
+     * @param idRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/online")
+    @AuthCheck(mustRole = "admin")
+    public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest,
+                                                     HttpServletRequest request) {
+        if (idRequest == null || idRequest.getId() <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //判断是否存在
+        long id = idRequest.getId();
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        if (oldInterfaceInfo == null){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+//        判断该接口是否可以调用
+        com.yzh.yslapiclientsdk.modal.User user = new com.yzh.yslapiclientsdk.modal.User();
+        user.setUsername("test");
+        yslApiClient.getUsernameByPost(user);
+        String username = yslApiClient.getUsernameByPost(user);
+        if (StringUtils.isBlank(username)){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"接口验证失败");
+        }
+        // 仅本人或管理员可修改
+        InterfaceInfo interfaceInfo = new InterfaceInfo();
+        interfaceInfo.setId(id);
+        interfaceInfo.setStatus(InterfaceInfoStatusEnum.ONLINE.getValue());
+        boolean result = interfaceInfoService.updateById(interfaceInfo);
+        return ResultUtils.success(result);
+    }
+    /**
+     * 下线
+     *
+     * @param idRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/offline")
+    public BaseResponse<Boolean> offlineInterfaceInfo(@RequestBody IdRequest idRequest,
+                                                     HttpServletRequest request) {
+        if (idRequest == null || idRequest.getId() <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //判断是否存在
+        long id = idRequest.getId();
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        if (oldInterfaceInfo == null){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+
+        // 仅本人或管理员可修改
+        InterfaceInfo interfaceInfo = new InterfaceInfo();
+        interfaceInfo.setId(id);
+        interfaceInfo.setStatus(InterfaceInfoStatusEnum.OFFLINE.getValue());
+        boolean result = interfaceInfoService.updateById(interfaceInfo);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 测试调用
+     *
+     * @param interfaceInfoInvokeRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/invoke")
+    public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
+                                                      HttpServletRequest request) {
+        if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId()<=0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
+        //判断是否存在
+        long id = interfaceInfoInvokeRequest.getId();
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        if (oldInterfaceInfo == null){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFFLINE.getValue()){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口关闭");
+        }
+        User loginUser = userService.getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        YslApiClient tempClient = new YslApiClient(accessKey,secretKey);
+
+        Gson gson = new Gson();
+        com.yzh.yslapiclientsdk.modal.User user = gson.fromJson(userRequestParams, com.yzh.yslapiclientsdk.modal.User.class);
+
+        String usernameByPost = tempClient.getUsernameByPost(user);
+        return ResultUtils.success(usernameByPost);
+    }
+
 
 }
