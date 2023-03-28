@@ -1,8 +1,9 @@
 package com.yzh.project.service;
 
 
+
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.yzh.project.model.entity.User;
+import com.yzh.yslapicommon.model.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
 

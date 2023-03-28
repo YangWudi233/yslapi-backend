@@ -1,6 +1,6 @@
 package com.yzh.project.service;
 
-import com.yzh.project.model.entity.User;
+import com.yzh.yslapicommon.model.entity.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

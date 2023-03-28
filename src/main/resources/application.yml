@@ -1,12 +1,21 @@
 spring:
+  cloud:
+    gateway:
+      default-filters:
+        - AddResponseHeader=source, yzh
+      routes:
+        - id: api_route
+          uri: http://localhost:8123
+          predicates:
+            - Path=/api/**
   application:
     name: yslapi
   # DataSource Config
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/yslapi
+    url: jdbc:mysql://8.130.68.218:3306/yslapi
     username: root
-    password: 1234
+    password: Yangzhenhao_2019
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
@@ -36,3 +45,18 @@ yslapi:
   client:
     access-key: yangzhenhao
     secret-key: abcdefgh
+logging:
+  level:
+    org:
+      springframework:
+        cloud:
+          gateway: trace
+dubbo:
+  application:
+    name: dubbo-springboot-demo-provider
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    id: nacos-registry
+    address: nacos://localhost:8848

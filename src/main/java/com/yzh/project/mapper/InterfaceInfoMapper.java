@@ -1,7 +1,7 @@
 package com.yzh.project.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.yzh.project.model.entity.InterfaceInfo;
+import com.yzh.yslapicommon.model.entity.InterfaceInfo;
 
 /**
 * @author User

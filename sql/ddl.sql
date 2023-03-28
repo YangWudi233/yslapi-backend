@@ -1,5 +1,5 @@
 -- 创建库
-create database if not exists my_db;
+create database if not exists yslapi;
 
 -- 切换库
 use yslapi;
