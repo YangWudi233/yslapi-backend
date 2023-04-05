@@ -23,3 +23,8 @@ create table if not exists user
         unique (userAccount)
 ) comment '用户';
 
+select interfaceInfoId, sum(totalNum) as totalNum
+from yslapi.user_interface_info
+group by interfaceInfoId
+order by totalNum desc
+limit 3

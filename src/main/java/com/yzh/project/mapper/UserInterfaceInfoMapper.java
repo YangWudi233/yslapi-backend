@@ -3,6 +3,8 @@ package com.yzh.project.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.yzh.yslapicommon.model.entity.UserInterfaceInfo;
 
+import java.util.List;
+
 /**
 * @author User
 * @description 针对表【user_interface_info(用户调用接口关系)】的数据库操作Mapper
@@ -10,6 +12,7 @@ import com.yzh.yslapicommon.model.entity.UserInterfaceInfo;
 * @Entity com.yzh.project.model.entity.UserInterfaceInfo
 */
 public interface UserInterfaceInfoMapper extends BaseMapper<UserInterfaceInfo> {
+    List<UserInterfaceInfo> listTopInvokeInterfaceInfo(int limit);
 
 }
 
