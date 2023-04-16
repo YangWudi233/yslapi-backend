@@ -207,7 +207,6 @@ public class InterfaceInfoController {
                 sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         Page<InterfaceInfo> interfaceInfoPage = interfaceInfoService.page(new Page<>(current, size), queryWrapper);
-//        interfaceInfoQuery.setCreateTime(interfaceInfoQuery.get);
         System.out.println(interfaceInfoQuery.getCreateTime());
         return ResultUtils.success(interfaceInfoPage);
     }
