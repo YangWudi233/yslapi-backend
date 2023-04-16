@@ -33,15 +33,15 @@ public class NameController {
         String sign = request.getHeader("sign");
 //to do最好去数据库查是否已分配给客户
         if (!accessKey.equals("yangzhenhao")){
-            throw new RuntimeException("无权限");
+            throw new RuntimeException("userInterfaceInfo");
         }
         if (Long.parseLong(nonce) > 10000){
-            throw new RuntimeException("无权限");
+            throw new RuntimeException("userInterfaceInfo");
         }
         //正常来说应该去数据空中拿secretKey
         String serverSign = SignUtils.getSign(body, "abcdefgh");
         if (!sign.equals(serverSign)){
-            throw new RuntimeException("无权限");
+            throw new RuntimeException("userInterfaceInfo");
 
         }
         return "Post 用户名字是" + user.getUsername();
