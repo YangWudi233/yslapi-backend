@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -193,10 +196,30 @@ public class UserController {
     @GetMapping("/list")
     public BaseResponse<List<UserVO>> listUser(UserQueryRequest userQueryRequest, HttpServletRequest request) {
         User userQuery = new User();
+//加一个条件判断，值长度小于1，就说明没有值，让其等于空
+//        if (userQueryRequest.getUserName().length()<1){
+//            userQueryRequest.setUserName(null);
+//        }
         if (userQueryRequest != null) {
             BeanUtils.copyProperties(userQueryRequest, userQuery);
         }
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        if (userQueryRequest.getUpdateTime()!=null){
+            try {
+                userQuery.setUpdateTime(format.parse(userQueryRequest.getUpdateTime()));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        if (userQueryRequest.getCreateTime()!=null){
+            try {
+                userQuery.setCreateTime(format.parse(userQueryRequest.getCreateTime()));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>(userQuery);
+//        queryWrapper.like(StringUtils.isNotBlank(userQueryRequest.getUserName()), "userName", userQueryRequest.getUserName());
         List<User> userList = userService.list(queryWrapper);
         List<UserVO> userVOList = userList.stream().map(user -> {
             UserVO userVO = new UserVO();

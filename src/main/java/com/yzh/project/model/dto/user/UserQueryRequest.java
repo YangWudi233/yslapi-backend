@@ -46,14 +46,25 @@ public class UserQueryRequest extends PageRequest implements Serializable {
     private String userRole;
 
     /**
+     * secretKey: secretKey
+     */
+    private String secretKey;
+
+    /**
+     * accessKey: accessKey
+     */
+    private String accessKey;
+
+
+    /**
      * 创建时间
      */
-    private Date createTime;
+    private String createTime;
 
     /**
      * 更新时间
      */
-    private Date updateTime;
+    private String updateTime;
 
     private static final long serialVersionUID = 1L;
 }

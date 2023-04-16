@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 查询请求
@@ -58,6 +59,17 @@ public class InterfaceInfoQueryRequest extends PageRequest implements Serializab
      * 请求类型
      */
     private String method;
+
+    /**
+     * 创建时间
+     */
+    private String[] createTime;
+
+    /**
+     * 创建时间
+     */
+
+    private String[] updateTime;
 
     /**
      * 创建人

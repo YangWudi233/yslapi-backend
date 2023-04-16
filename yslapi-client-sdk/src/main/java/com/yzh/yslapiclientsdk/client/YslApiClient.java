@@ -18,6 +18,7 @@ import static com.yzh.yslapiclientsdk.utils.SignUtils.getSign;
  * @author yzh
  */
 public class YslApiClient {
+
     public static final String GATEWAY_HOST = "http://localhost:8090";
 
     private String accessKey;

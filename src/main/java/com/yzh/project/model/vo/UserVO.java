@@ -38,6 +38,16 @@ public class UserVO implements Serializable {
     private Integer gender;
 
     /**
+     * 用户角色: secretKey
+     */
+    private String secretKey;
+
+    /**
+     * 用户角色: accessKey
+     */
+    private String accessKey;
+
+    /**
      * 用户角色: user, admin
      */
     private String userRole;

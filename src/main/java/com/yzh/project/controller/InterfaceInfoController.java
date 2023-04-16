@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 
@@ -173,8 +174,9 @@ public class InterfaceInfoController {
      * @param request
      * @return
      */
-    @GetMapping("/list/page")
-    public BaseResponse<Page<InterfaceInfo>> listInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest, HttpServletRequest request) {
+    @PostMapping("/list/page")
+    public BaseResponse<Page<InterfaceInfo>> listInterfaceInfoByPage(@RequestBody InterfaceInfoQueryRequest interfaceInfoQueryRequest, HttpServletRequest request) {
+        System.out.println(request.getParameterValues("updateTime"));
         if (interfaceInfoQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -185,7 +187,7 @@ public class InterfaceInfoController {
         String sortField = interfaceInfoQueryRequest.getSortField();
         String sortOrder = interfaceInfoQueryRequest.getSortOrder();
         String content = interfaceInfoQuery.getDescription();
-        // content 需支持模糊搜索
+        // content 需支持  模糊搜索
         interfaceInfoQuery.setDescription(null);
         // 限制爬虫
         if (size > 50) {
@@ -193,9 +195,20 @@ public class InterfaceInfoController {
         }
         QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>(interfaceInfoQuery);
         queryWrapper.like(StringUtils.isNotBlank(content), "content", content);
+        if (interfaceInfoQueryRequest.getUpdateTime()!=null&&interfaceInfoQueryRequest.getCreateTime()!=null){
+            //创建时间
+            queryWrapper.ge(StringUtils.isNotBlank(interfaceInfoQueryRequest.getCreateTime()[0]),"createTime",interfaceInfoQueryRequest.getCreateTime()[0])
+                    .le(StringUtils.isNotBlank(interfaceInfoQueryRequest.getCreateTime()[1]),"createTime",interfaceInfoQueryRequest.getCreateTime()[1]);
+            //更新时间
+            queryWrapper.ge(StringUtils.isNotBlank(interfaceInfoQueryRequest.getUpdateTime()[0]),"updateTime",interfaceInfoQueryRequest.getUpdateTime()[0])
+                    .le(StringUtils.isNotBlank(interfaceInfoQueryRequest.getUpdateTime()[1]),"updateTime",interfaceInfoQueryRequest.getUpdateTime()[1]);
+        }
         queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
                 sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         Page<InterfaceInfo> interfaceInfoPage = interfaceInfoService.page(new Page<>(current, size), queryWrapper);
+//        interfaceInfoQuery.setCreateTime(interfaceInfoQuery.get);
+        System.out.println(interfaceInfoQuery.getCreateTime());
         return ResultUtils.success(interfaceInfoPage);
     }
 
