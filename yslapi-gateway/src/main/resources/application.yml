@@ -8,7 +8,7 @@ spring:
         - AddResponseHeader=source, yzh
       routes:
         - id: api_route
-          uri: http://localhost:8123
+          uri: http://8.130.68.218:8123
           predicates:
             - Path=/api/**
 dubbo:
@@ -19,4 +19,4 @@ dubbo:
     port: -1
   registry:
     id: nacos-registry
-    address: nacos://localhost:8848
+    address: nacos://172.16.159.71:8848
