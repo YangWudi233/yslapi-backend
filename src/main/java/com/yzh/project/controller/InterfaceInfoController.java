@@ -1,27 +1,30 @@
 package com.yzh.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.yzh.project.annotation.AuthCheck;
 import com.yzh.project.common.*;
 import com.yzh.project.constant.CommonConstant;
 import com.yzh.project.exception.BusinessException;
+import com.yzh.project.mapper.UserInterfaceInfoMapper;
 import com.yzh.project.model.dto.interfaceinfo.InterfaceInfoAddRequest;
 import com.yzh.project.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import com.yzh.project.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.yzh.project.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
 import com.yzh.project.model.enums.InterfaceInfoStatusEnum;
 import com.yzh.project.service.InterfaceInfoService;
+import com.yzh.project.service.UserInterfaceInfoService;
 import com.yzh.project.service.UserService;
 import com.yzh.yslapiclientsdk.client.YslApiClient;
 import com.yzh.yslapicommon.model.entity.InterfaceInfo;
 import com.yzh.yslapicommon.model.entity.User;
+import com.yzh.yslapicommon.model.entity.UserInterfaceInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
@@ -37,6 +40,12 @@ import java.util.List;
 @RequestMapping("/interfaceInfo")
 @Slf4j
 public class InterfaceInfoController {
+
+    @Resource
+    private UserInterfaceInfoService UserInterfaceInfoService;
+
+    @Resource
+    private UserInterfaceInfoMapper userInterfaceInfoMapper;
 
     @Resource
     private InterfaceInfoService interfaceInfoService;
@@ -298,7 +307,23 @@ public class InterfaceInfoController {
         if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFFLINE.getValue()){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口关闭");
         }
+
+
         User loginUser = userService.getLoginUser(request);
+
+
+        //调用成功次数加一
+        QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userId", loginUser.getId());
+        queryWrapper.eq("interfaceInfoId", id);
+        UserInterfaceInfo interfaceInfo = userInterfaceInfoMapper.selectOne(queryWrapper);
+        UpdateWrapper<UserInterfaceInfo> updateWrapper = new UpdateWrapper();
+        updateWrapper.eq("userId", loginUser.getId());
+        updateWrapper.eq("interfaceInfoId", id);
+        updateWrapper.set("totalNum", interfaceInfo.getTotalNum()+1);
+        UserInterfaceInfoService.update(null, updateWrapper);
+
+
         String accessKey = loginUser.getAccessKey();
         String secretKey = loginUser.getSecretKey();
         YslApiClient tempClient = new YslApiClient(accessKey,secretKey);
@@ -309,6 +334,7 @@ public class InterfaceInfoController {
         String usernameByPost = tempClient.getUsernameByPost(user);
         return ResultUtils.success(usernameByPost);
     }
+
 
 
 }
